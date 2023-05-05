@@ -1,260 +1,180 @@
-# 13 Object-Relational Mapping (ORM): E-Commerce Back End
+# E-Commerce-Hub
 
-## Your Task
+## Description 
 
-Internet retail, also known as **e-commerce**, is the largest sector of the electronics industry, generating an estimated $29 trillion in 2019. E-commerce platforms like Shopify and WooCommerce provide a suite of services to businesses of all sizes. Due to their prevalence, understanding the fundamental architecture of these platforms will benefit you as a full-stack web developer.
-
-Your task is to build the back end for an e-commerce site by modifying starter code. You’ll configure a working Express.js API to use Sequelize to interact with a MySQL database.
-
-Because this application won’t be deployed, you’ll also need to provide a link to a walkthrough video that demonstrates its functionality and all of the acceptance criteria being met. You’ll need to submit a link to the video and add it to the readme of your project.
-
-## User Story
-
-```md
-AS A manager at an internet retail company
-I WANT a back end for my e-commerce website that uses the latest technologies
-SO THAT my company can compete with other e-commerce companies
-```
-
-## Acceptance Criteria
-
-```md
-GIVEN a functional Express.js API
-WHEN I add my database name, MySQL username, and MySQL password to an environment variable file
-THEN I am able to connect to a database using Sequelize
-WHEN I enter schema and seed commands
-THEN a development database is created and is seeded with test data
-WHEN I enter the command to invoke the application
-THEN my server is started and the Sequelize models are synced to the MySQL database
- WHEN I open API GET routes in Insomnia for categories, products, or tags
- THEN the data for each of these routes is displayed in a formatted JSON
- WHEN I test API POST, PUT, and DELETE routes in Insomnia
- THEN I am able to successfully create, update, and delete data in my database
-```
+This is an E-Commerce Backend Hub Application, this is a tool for companies to store relavant product information in a secure server that allows for categorical creation, updating, and deletion with ease. This application uses express routes and SQL methods in order to provide users with a seamless database that is both easy and effective when it comes to product organization and upkeeping.
 
 ## Mock-Up
 
-The following animation shows the application's GET routes to return all categories, all products, and all tags being tested in Insomnia:
-
-![In Insomnia, the user tests “GET tags,” “GET Categories,” and “GET All Products.”.](./Assets/13-orm-homework-demo-01.gif)
+### Here is a video link showing the usage of the application:
+[E-Commerce Hub Video Demo](https://drive.google.com/file/d/14L3AyHbhvUEWOUyBVTyy0pmniRsqDGk_/view)
+
+### The following is an example output of testing the get route of categories within insomnia for the E-Commerce Hub:
 
-The following animation shows the application's GET routes to return a single category, a single product, and a single tag being tested in Insomnia:
+![Insomnia Get Output](./Assets/categoryget.png)
 
-![In Insomnia, the user tests “GET tag by id,” “GET Category by ID,” and “GET One Product.”](./Assets/13-orm-homework-demo-02.gif)
+## Table of Contents
 
-The following animation shows the application's POST, PUT, and DELETE routes for categories being tested in Insomnia:
+* [Installation](#installation)
+* [Code Example](#code-example)
+* [Usage](#usage)
+* [Learning Points](#learning-points)
+* [Author Info](#author-info)
+* [Credits](#credits)
+* [License](#license)
 
-![In Insomnia, the user tests “DELETE Category by ID,” “CREATE Category,” and “UPDATE Category.”](./Assets/13-orm-homework-demo-03.gif)
+## Installation
 
-Your walkthrough video should also show the POST, PUT, and DELETE routes for products and tags being tested in Insomnia.
+1. Clone down the repository or download all files within repository
+2. You will need to install node.js
+3. You will need to edit the .env file to the database, user, and password that you use for SQL.
+4. Run the SQL shell within VS code to instantiate your schema.sql by typing in terminal:
+```
+mysql -u root -p
+```
+5. Instantiate the seeds by typing in terminal:
+```
+npm run seed
+```
+6. Open terminal within VS Code and type 'node server.js'
+7. Load up the local host url port using the port you set ( I set it at 3001 or use an app like insomnia to test different api routes for getting, creating, and updating data)
+8. You might need to install these packages: sequelize, mysql2, express, dotenv.
 
-## Getting Started
+```
+npm i sequelize
 
-This Challenge will require a video submission. Refer to the [Fullstack Blog Video Submission Guide](https://coding-boot-camp.github.io/full-stack/computer-literacy/video-submission-guide) for additional guidance on creating a video.
+npm i mysql2
 
-You’ll need to use the [MySQL2](https://www.npmjs.com/package/mysql2) and [Sequelize](https://www.npmjs.com/package/sequelize) packages to connect your Express.js API to a MySQL database and the [dotenv](https://www.npmjs.com/package/dotenv) package to use environment variables to store sensitive data.
+npm i express
 
-Use the `schema.sql` file in the `db` folder to create your database with MySQL shell commands. Use environment variables to store sensitive data like your MySQL username, password, and database name.
+npm i dotenv
+```
 
-### Database Models
+## Code Example
 
-Your database should contain the following four models, including the requirements listed for each model:
+Here is an example of my post route within my product-routes.js that allows users to create a new product and with the given attributes like name, price, stock, etc.
 
-* `Category`
+product-routes.js post route:
+```javascript
+router.post('/', async (req, res) => {
+  try {
+    const newProduct = await Product.create({
+      product_name: req.body.product_name,
+      price: req.body.price,
+      stock: req.body.stock,
+      category_id: req.body.category_id,
+    });
+    if (!newProduct) {
+      res.status(404).json({ message: 'Product not created incorrect fields' });
+      return;
+    }
+    const tagNames = req.body.tags || [];
+    const tags = await Tag.findAll({
+      where: {
+        tag_name: tagNames,
+      },
+    });
+    await newProduct.addTags(tags);
+    res.status(200).json(newProduct);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+});
+```
 
-  * `id`
+## Usage
 
-    * Integer.
-  
-    * Doesn't allow null values.
-  
-    * Set as primary key.
-  
-    * Uses auto increment.
+### Here is a video link showing the usage of the application:
+[E-Commerce Hub Video Demo](https://drive.google.com/file/d/14L3AyHbhvUEWOUyBVTyy0pmniRsqDGk_/view)
 
-  * `category_name`
-  
-    * String.
-  
-    * Doesn't allow null values.
+### Here you can see how I access the terminal within VS Code:
 
-* `Product`
+![Accessing terminal](./Assets/accessterminal.png)
 
-  * `id`
-  
-    * Integer.
-  
-    * Doesn't allow null values.
-  
-    * Set as primary key.
-  
-    * Uses auto increment.
+### Here you can see what I input into the terminal to initalize the application:
 
-  * `product_name`
-  
-    * String.
-  
-    * Doesn't allow null values.
+![Terminal Input Screenshot](./Assets/terminalinput.png)
 
-  * `price`
-  
-    * Decimal.
-  
-    * Doesn't allow null values.
-  
-    * Validates that the value is a decimal.
+### Here you can see that after the 'node server.js' input you should be able to see that the server is now listening:
 
-  * `stock`
-  
-    * Integer.
-  
-    * Doesn't allow null values.
-  
-    * Set a default value of `10`.
-  
-    * Validates that the value is numeric.
+![Terminal Output Screenshot](./Assets/terminaloutput.png)
 
-  * `category_id`
-  
-    * Integer.
-  
-    * References the `Category` model's `id`.
+### Here is an example of what can be an expected output from using the api/categories route which will get all data currently seeded in:
 
-* `Tag`
+![Get Categories](./Assets/categoryget.png)
 
-  * `id`
-  
-    * Integer.
-  
-    * Doesn't allow null values.
-  
-    * Set as primary key.
-  
-    * Uses auto increment.
+### Here is an example of creating a new category:
 
-  * `tag_name`
-  
-    * String.
+![Add New Category](./Assets/newcategoryadd.png)
+![Add New Category](./Assets/newcategoryadd1.png)
 
-* `ProductTag`
+### Here is an example of updating that new category's name:
 
-  * `id`
+![Update New Category](./Assets/newcategoryupdate.png)
+![Update New Category](./Assets/newcategoryupdate1.png)
 
-    * Integer.
+### Here is an example of deleting that new category:
+![Delete New Category](./Assets/newcategorydelete.png)
+![Delete New Category](./Assets/newcategorydelete1.png)
 
-    * Doesn't allow null values.
+## Learning Points 
 
-    * Set as primary key.
+This project taught me a lot and solidified my knowledge of node.js as well as using different express packages like dotenv, mysql, and sequelize that created this application and allowed it to flourish. It provided me with different use cases of mySQL within javascript functionalities and applications. I have fully understood through this project the abilities of routing for data securing, and data organization. In the future I would love to incorporate more routes for users in case they want specific categories for example people who purchased products, or more attributes like which products are popular based on how many sold, etc.
 
-    * Uses auto increment.
+## About Me
 
-  * `product_id`
+Hi, my name is Bryan Nguyen I am an up and coming full-stack web developer working
+on getting into the space with projects that support both my growth, belief, and imagination. I hope to one day work within the realm of AI, web-development, and even site-reliability/cyber-security.
 
-    * Integer.
+## My links
 
-    * References the `Product` model's `id`.
+### * [Portfolio](https://bryannguyen9.github.io/Bryan-Nguyen-Portfolio/)
+### * [LinkedIn](https://linkedin.com/in/bryannguyen9)
+### * [Github](https://github.com/bryannguyen9)
 
-  * `tag_id`
 
-    * Integer.
+## Credits
 
-    * References the `Tag` model's `id`.
+### Special thanks to David Chung: 
+ 
+- [David Chung's Github](https://github.com/dchung13/)
+- [David Chung's LinkedIn](https://www.linkedin.com/in/david-chung-77141526b/)
+- [David Chung's Portfolio](https://dchung13.github.io/David-Chung-Portfolio/) 
 
-### Associations
+### Special thanks to these reference websites that taught me different functionalities within my website for me to create a seamless experience for users.
 
-You'll need to execute association methods on your Sequelize models to create the following relationships between them:
+1. [Stack Overflow](https://stackoverflow.com/questions/64220107/passing-sql-queries-into-inquirer-prompt)
+2. [NpmJS for mysql2](https://www.npmjs.com/package/mysql2)
+3. [NpmJS for inquirer](https://www.npmjs.com/package/inquirer)
 
-* `Product` belongs to `Category`, and `Category` has many `Product` models, as a category can have multiple products but a product can only belong to one category.
+## License
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-* `Product` belongs to many `Tag` models, and `Tag` belongs to many `Product` models. Allow products to have multiple tags and tags to have many products by using the `ProductTag` through model.
+This project is licensed under the MIT License.
 
-> **Hint:** Make sure you set up foreign key relationships that match the column we created in the respective models.
+MIT License
 
-### Fill Out the API Routes to Perform RESTful CRUD Operations
+    Copyright (c) [2023] [Bryan Nguyen]
+    
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+    
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+    
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
 
-Fill out the unfinished routes in `product-routes.js`, `tag-routes.js`, and `category-routes.js` to perform create, read, update, and delete operations using your Sequelize models.
+For further details on the MIT License you can click on this link: [Link to MIT License Details](https://opensource.org/license/mit/)
 
-Note that the functionality for creating the many-to-many relationship for products has already been completed for you.
 
-> **Hint**: Be sure to look at the mini-project code for syntax help and use your model's column definitions to figure out what `req.body` will be for POST and PUT routes!
-
-### Seed the Database
-
-After creating the models and routes, run `npm run seed` to seed data to your database so that you can test your routes.
-
-### Sync Sequelize to the Database on Server Start
-
-Create the code needed in `server.js` to sync the Sequelize models to the MySQL database on server start.
-
-## Grading Requirements
-
-> **Note**: If a Challenge assignment submission is marked as “0”, it is considered incomplete and will not count towards your graduation requirements. Examples of incomplete submissions include the following:
->
-> * A repository that has no code
->
-> * A repository that includes a unique name but nothing else
->
-> * A repository that includes only a README file but nothing else
->
-> * A repository that only includes starter code
-
-This Challenge is graded based on the following criteria: 
-
-### Deliverables: 10%
-
-* The GitHub repository containing your application code.
-
-### Walkthrough Video: 37%
-
-* A walkthrough video that demonstrates the functionality of the e-commerce back end must be submitted, and a link to the video should be included in your readme file.
-
-* The walkthrough video must show all of the technical acceptance criteria being met.
-
-* The walkthrough video must demonstrate how to create the schema from the MySQL shell.
-
-* The walkthrough video must demonstrate how to seed the database from the command line.
-
-* The walkthrough video must demonstrate how to start the application’s server.
-
-* The walkthrough video must demonstrate GET routes for all categories, all products, and all tags being tested in Insomnia.
-
-* The walkthrough video must demonstrate GET routes for a single category, a single product, and a single tag being tested in Insomnia.
-
-* The walkthrough video must demonstrate POST, PUT, and DELETE routes for categories, products, and tags being tested in Insomnia.
-
-### Technical Acceptance Criteria: 40%
-
-* Satisfies all of the preceding acceptance criteria plus the following:
-
-  * Connects to a MySQL database using the [MySQL2](https://www.npmjs.com/package/mysql) and [Sequelize](https://www.npmjs.com/package/sequelize) packages.
-
-  * Stores sensitive data, like a user’s MySQL username, password, and database name, using environment variables through the [dotenv](https://www.npmjs.com/package/dotenv) package.
-
-  * Syncs Sequelize models to a MySQL database on the server start.
-
-  * Includes column definitions for all four models outlined in the Challenge instructions.
-
-  * Includes model associations outlined in the Challenge instructions.
-
-### Repository Quality: 13%
-
-* Repository has a unique name.
-
-* Repository follows best practices for file structure and naming conventions.
-
-* Repository follows best practices for class/id naming conventions, indentation, quality comments, etc.
-
-* Repository contains multiple descriptive commit messages.
-
-* Repository contains quality readme with description and a link to a walkthrough video.
-
-## Review
-
-You are required to submit BOTH of the following for review:
-
-* A walkthrough video demonstrating the functionality of the application and all of the acceptance criteria being met.
-
-* The URL of the GitHub repository. Give the repository a unique name and include a readme describing the project.
-
----
-© 2023 edX Boot Camps LLC. Confidential and Proprietary. All Rights Reserved.
