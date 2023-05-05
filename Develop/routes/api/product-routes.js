@@ -8,39 +8,45 @@ router.get('/', async (req, res) => {
   try {
     const productData = await Product.findAll({
       include: [
-        { model: Category },
-        { model: Tag, through: { attributes: [] } },
-      ],
+        {
+          model: Category,
+          attributes: ['id', 'category_name']
+        },
+        {
+          model: Tag,
+          attributes: ['id', 'tag_name'],
+          through: ProductTag,
+          as: 'tags'
+        }
+      ]
     });
-    const productWithTags = productData.map((product) => {
-      const tagIds = product.Tags.map((tag) => tag.id);
-      return { ...product.toJSON(), tagIds };
-    });
-    res.status(200).json(productWithTags);
+    res.status(200).json(productData);
   } catch (err) {
     res.status(500).json(err);
-  };
+  }
 });
 
   // find a single product by its `id`
 router.get('/:id', async (req, res) => {
   try {
-    const specificProduct = await Product.findByPk(req.params.id, {
+    const specificProductData = await Product.findByPk(req.params.id, {
       include: [
-        { model: Category },
-        { model: Tag, through: { attributes: [] } },
-      ],
+        {
+          model: Category,
+          attributes: ['id', 'category_name']
+        },
+        {
+          model: Tag,
+          attributes: ['id', 'tag_name'],
+          through: ProductTag,
+          as: 'tags'
+        }
+      ]
     });
-    if (!specificProduct) {
-      res.status(404).json({ message: 'Product not found' });
-      return;
-    };
-    const tagIds = specificProduct.Tags.map((tag) => tag.id);
-    const productWithTags = { ...specificProduct.toJSON(), tagIds };
-    res.status(200).json(productWithTags);
+    res.status(200).json(specificProductData);
   } catch (err) {
     res.status(500).json(err);
-  };
+  }
 });
 
 // create new product
@@ -127,7 +133,7 @@ router.put('/:id', (req, res) => {
         ProductTag.bulkCreate(newProductTags),
       ]);
     })
-    .then((updatedProductTags) => res.json(updatedProductTags))
+    .then((updatedProductTags) =>  res.status(200).json(updatedProductTags))
     .catch((err) => {
       // console.log(err);
       res.status(400).json(err);
